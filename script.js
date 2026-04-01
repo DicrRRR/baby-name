@@ -544,7 +544,8 @@ function getMissingWuxing(wuxingCount) {
 }
 
 // 根据五行和性别推荐名字
-function recommendNamesByWuxing(missing, gender, length, source) {
+// excludeNames: 要排除的名字列表（上次生成过的名字）
+function recommendNamesByWuxing(missing, gender, length, source, excludeNames = []) {
     let candidates = [];
     
     if (source === 'random') {
@@ -556,7 +557,7 @@ function recommendNamesByWuxing(missing, gender, length, source) {
     }
     
     // 第一步：按字数筛选（length=1 为单字名，length=2 为双字名）
-    const lengthFiltered = candidates.filter(name => {
+    let lengthFiltered = candidates.filter(name => {
         return name.name.length === length;
     });
     
@@ -584,7 +585,35 @@ function recommendNamesByWuxing(missing, gender, length, source) {
         filtered = genderFiltered;
     }
     
-    // 第三步：根据性别特征排序（给符合性别气质的名字更高优先级）
+    // 第四步：排除之前生成过的名字（降低重复率）
+    if (excludeNames && excludeNames.length > 0) {
+        // 计算最大允许的重复数量（20%）
+        const maxDuplicates = Math.floor(filtered.length * 0.2);
+        
+        // 分离出未重复和已重复的名字
+        const nonDuplicateNames = filtered.filter(name => !excludeNames.includes(name.name));
+        const duplicateNames = filtered.filter(name => excludeNames.includes(name.name));
+        
+        // 如果未重复的名字足够多，优先使用未重复的
+        if (nonDuplicateNames.length >= 10) {
+            filtered = nonDuplicateNames;
+        } else {
+            // 如果未重复的不够，混合使用（保持重复率不超过 20%）
+            const neededCount = Math.max(10, Math.floor(nonDuplicateNames.length / 0.8));
+            const allowedDuplicates = Math.min(maxDuplicates, neededCount - nonDuplicateNames.length);
+            
+            // 随机选择一些未重复的和一些重复的
+            const shuffledNonDup = nonDuplicateNames.sort(() => Math.random() - 0.5);
+            const shuffledDup = duplicateNames.sort(() => Math.random() - 0.5);
+            
+            filtered = [
+                ...shuffledNonDup.slice(0, neededCount - allowedDuplicates),
+                ...shuffledDup.slice(0, allowedDuplicates)
+            ];
+        }
+    }
+    
+    // 第五步：根据性别特征排序（给符合性别气质的名字更高优先级）
     if (gender === 'male') {
         const malePositiveKeywords = ['阳', '刚', '强', '伟', '博', '志', '远', '浩', '峻', '茂', 
                                        '骏', '鹏', '飞', '逸', '翰', '俊', '杰', '铭', '哲', '轩',
@@ -611,7 +640,14 @@ function recommendNamesByWuxing(missing, gender, length, source) {
         });
     }
     
-    return filtered.slice(0, 12);
+    // 返回 10-20 个名字（如果足够的话）
+    const targetCount = Math.floor(Math.random() * 11) + 10; // 10-20 之间的随机数
+    const result = filtered.slice(0, targetCount);
+    
+    // 保存上次生成的名字
+    lastGeneratedNames = result;
+    
+    return result;
 }
 
 // ==================== 收藏功能 ====================
@@ -619,6 +655,8 @@ function recommendNamesByWuxing(missing, gender, length, source) {
 let favorites = [];
 let namingHistory = [];
 let currentNamingResult = null; // 保存当前起名结果用于导出
+let generatedNamePool = []; // 记录本次生成的所有名字，用于降低重复率
+let lastGeneratedNames = []; // 上次生成的名字列表
 
 // 从 localStorage 加载收藏
 function loadFavorites() {
@@ -1081,8 +1119,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // 显示分析结果
         displayAnalysis(bazi, wuxingCount, missingWuxing, birthMonth, birthDay);
         
-        // 生成名字
-        const recommendedNames = recommendNamesByWuxing(missingWuxing, gender, nameLength, source);
+        // 生成名字（第一次生成）
+        const recommendedNames = recommendNamesByWuxing(missingWuxing, gender, nameLength, source, []);
         displayNames(surname, recommendedNames, nameLength);
         
         // 保存当前结果用于导出
@@ -1117,9 +1155,58 @@ document.addEventListener('DOMContentLoaded', function() {
         analysisSection.style.display = 'block';
         resultsSection.style.display = 'block';
         toolbarSection.style.display = 'flex';
+        refreshBtn.style.display = 'block'; // 显示刷新按钮
         
         // 滚动到结果区域
         resultsSection.scrollIntoView({ behavior: 'smooth' });
+    });
+    
+    // 刷新名字按钮
+    const refreshBtn = document.getElementById('refreshBtn');
+    refreshBtn.addEventListener('click', function() {
+        const surname = document.getElementById('surname').value.trim();
+        const gender = document.getElementById('gender').value;
+        const nameLength = parseInt(document.getElementById('nameLength').value);
+        const source = document.getElementById('source').value;
+        const birthYear = parseInt(document.getElementById('birthYear').value);
+        const birthMonth = parseInt(document.getElementById('birthMonth').value);
+        const birthDay = parseInt(document.getElementById('birthDay').value);
+        const birthHour = parseInt(document.getElementById('birthHour').value);
+        
+        // 使用上次生成的名字作为排除列表
+        const excludeNames = lastGeneratedNames.map(n => n.name);
+        
+        // 生成新的名字（排除之前的名字）
+        const recommendedNames = recommendNamesByWuxing(
+            currentNamingResult.missingWuxing, 
+            gender, 
+            nameLength, 
+            source,
+            excludeNames
+        );
+        
+        displayNames(surname, recommendedNames, nameLength);
+        
+        // 更新当前结果
+        currentNamingResult.names = recommendedNames.map(n => ({
+            fullName: surname + n.name,
+            ...n
+        }));
+        
+        // 更新历史记录
+        saveHistory({
+            surname: surname,
+            gender: gender,
+            source: source,
+            birthYear: birthYear,
+            bazi: currentNamingResult.bazi,
+            names: recommendedNames.map(n => n.name)
+        });
+        
+        // 滚动到结果区域
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+        
+        showToast('已刷新名字，重复率低于 20%');
     });
     
     // 清空收藏按钮
