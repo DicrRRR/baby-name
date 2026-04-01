@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新生儿起名 - 传承经典，赐子好名</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>👶 新生儿起名</h1>
+            <p class="subtitle">传承经典 · 五行平衡 · 寓意美好</p>
+        </header>
+
+        <main>
+            <!-- 基本信息表单 -->
+            <section class="form-section">
+                <h2>基本信息</h2>
+                <form id="nameForm">
+                    <div class="form-group">
+                        <label for="surname">姓氏：</label>
+                        <input type="text" id="surname" required placeholder="请输入姓氏">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gender">性别：</label>
+                        <select id="gender" required>
+                            <option value="">请选择</option>
+                            <option value="male">男</option>
+                            <option value="female">女</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nameLength">名字字数：</label>
+                        <select id="nameLength" required>
+                            <option value="">请选择</option>
+                            <option value="1">单字名</option>
+                            <option value="2">双字名</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="source">名字来源：</label>
+                        <select id="source" required>
+                            <option value="">请选择</option>
+                            <option value="shijing">诗经</option>
+                            <option value="chuci">楚辞</option>
+                            <option value="lunyu">论语</option>
+                            <option value="mengzi">孟子</option>
+                            <option value="daxue">大学</option>
+                            <option value="zhongyong">中庸</option>
+                            <option value="zhouyi">周易</option>
+                            <option value="shangshu">尚书</option>
+                            <option value="liji">礼记</option>
+                            <option value="daodejing">道德经</option>
+                            <option value="tangshi">唐诗</option>
+                            <option value="songci">宋词</option>
+                            <option value="random">随机组合</option>
+                        </select>
+                    </div>
+                </form>
+            </section>
+
+            <!-- 生辰八字表单 -->
+            <section class="form-section">
+                <h2>生辰八字</h2>
+                <form id="baziForm">
+                    <div class="form-group">
+                        <label for="birthYear">出生年份：</label>
+                        <input type="number" id="birthYear" required placeholder="如：2024" min="1900" max="2100">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="birthMonth">出生月份：</label>
+                        <select id="birthMonth" required>
+                            <option value="">请选择</option>
+                            <option value="1">正月 (寅)</option>
+                            <option value="2">二月 (卯)</option>
+                            <option value="3">三月 (辰)</option>
+                            <option value="4">四月 (巳)</option>
+                            <option value="5">五月 (午)</option>
+                            <option value="6">六月 (未)</option>
+                            <option value="7">七月 (申)</option>
+                            <option value="8">八月 (酉)</option>
+                            <option value="9">九月 (戌)</option>
+                            <option value="10">十月 (亥)</option>
+                            <option value="11">十一月 (子)</option>
+                            <option value="12">十二月 (丑)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="birthDay">出生日期：</label>
+                        <input type="number" id="birthDay" required placeholder="日期" min="1" max="31">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="birthHour">出生时辰：</label>
+                        <select id="birthHour" required>
+                            <option value="">请选择</option>
+                            <option value="0">子时 (23:00-01:00)</option>
+                            <option value="2">丑时 (01:00-03:00)</option>
+                            <option value="4">寅时 (03:00-05:00)</option>
+                            <option value="6">卯时 (05:00-07:00)</option>
+                            <option value="8">辰时 (07:00-09:00)</option>
+                            <option value="10">巳时 (09:00-11:00)</option>
+                            <option value="12">午时 (11:00-13:00)</option>
+                            <option value="14">未时 (13:00-15:00)</option>
+                            <option value="16">申时 (15:00-17:00)</option>
+                            <option value="18">酉时 (17:00-19:00)</option>
+                            <option value="20">戌时 (19:00-21:00)</option>
+                            <option value="22">亥时 (21:00-23:00)</option>
+                        </select>
+                    </div>
+                </form>
+            </section>
+
+            <!-- 分析结果 -->
+            <section class="analysis-section" id="analysisSection" style="display: none;">
+                <h2>命理分析</h2>
+                
+                <!-- 八字命盘图 -->
+                <div class="bazi-chart-container">
+                    <h3>📊 八字命盘图</h3>
+                    <canvas id="baziChart" width="800" height="600"></canvas>
+                </div>
+                
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <h3>📅 八字排盘</h3>
+                        <div id="baziResult"></div>
+                    </div>
+                    <div class="analysis-card">
+                        <h3>☯️ 五行分析</h3>
+                        <div id="wuxingResult"></div>
+                    </div>
+                    <div class="analysis-card">
+                        <h3>☰ 八卦分析</h3>
+                        <div id="baguaResult"></div>
+                    </div>
+                    <div class="analysis-card">
+                        <h3>🎵 纳音五行</h3>
+                        <div id="nayinResult"></div>
+                    </div>
+                    <div class="analysis-card">
+                        <h3>⭐ 星座分析</h3>
+                        <div id="constellationResult"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 生成名字按钮 -->
+            <button type="button" class="generate-btn" id="generateBtn">
+                ✨ 开始起名
+            </button>
+
+            <!-- 导出和历史记录工具栏 -->
+            <div class="toolbar-section" id="toolbarSection" style="display: none;">
+                <button type="button" class="export-btn" id="exportPdfBtn">
+                    📄 导出 PDF
+                </button>
+                <button type="button" class="export-btn" id="exportWordBtn">
+                    📝 导出 Word
+                </button>
+                <button type="button" class="export-btn" id="historyBtn">
+                    📜 历史记录
+                </button>
+                <button type="button" class="export-btn" id="posterBtn">
+                    🎨 生成海报
+                </button>
+            </div>
+
+            <!-- 名字结果 -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <h2>推荐名字</h2>
+                <div class="names-grid" id="namesGrid"></div>
+            </section>
+
+            <!-- 历史记录面板 -->
+            <section class="history-section" id="historySection" style="display: none;">
+                <h2>📜 起名历史</h2>
+                <div class="history-toolbar">
+                    <span id="historyCount">共 0 条记录</span>
+                    <button type="button" class="clear-history-btn" id="clearHistoryBtn">清空历史</button>
+                </div>
+                <div class="history-list" id="historyList"></div>
+            </section>
+
+            <!-- 收藏的名字 -->
+            <section class="favorites-section" id="favoritesSection" style="display: none;">
+                <h2>⭐ 收藏的名字</h2>
+                <div class="favorites-toolbar">
+                    <span id="favoritesCount">已收藏 0 个名字</span>
+                    <button type="button" class="clear-favorites-btn" id="clearFavoritesBtn">清空收藏</button>
+                </div>
+                <div class="names-grid" id="favoritesGrid"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2024 新生儿起名 | 传承中华文化</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
